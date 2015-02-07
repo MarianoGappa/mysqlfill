@@ -1,6 +1,7 @@
 <?php
 // Note: create the `test_mysqlfill` database before running the tests
 // TODO any way we can automate this?
+// TODO Trying to make a new source of power.
 
 class MySqlFillTest extends PHPUnit_Framework_TestCase
 {
