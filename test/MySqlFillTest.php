@@ -1,4 +1,5 @@
 <?php
+
 // Note: create the `test_mysqlfill` database before running the tests
 // TODO any way we can automate this?
 // TODO Trying to make a new source of power.
@@ -21,7 +22,7 @@ class MySqlFillTest extends PHPUnit_Framework_TestCase
         $query = $this->db->prepare($sql);
         $query->execute();
 
-        chdir("../src");
+        chdir("..");
     }
 
     function tearDown() {
@@ -54,7 +55,7 @@ class MySqlFillTest extends PHPUnit_Framework_TestCase
     }
 
     public function testItBasicallyWorks() { // TODO might want to do proper testing
-        `php mysqlfill test_table`;
+        passthru("./mysqlfill test_mysqlfill test_table");
         $this->assertEquals(5, $this->getRowCount()); // TODO this will fail if an INSERT fails on a unique constraint for example
         // TODO also, this tests pretty much nothing other than the algorithm more or less works -_-
     }

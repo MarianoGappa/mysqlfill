@@ -1,22 +1,23 @@
 <?php
 date_default_timezone_set("UTC");
 
-class MySqlFill {
-    private $db; // TODO put the "obtainDb" in the constructor; this is needed for testing
-    private $dbName;
-    private $tableName; // TODO in the future, we want to be able to fill many tables with one call
-    private $rowsToFill = 5; // TODO caller should be able to override this number
-    private $tableStructure; // TODO in the future, we want to be able to fill many tables with one call
+include_once 'ConfigLoader.php';
 
-    public function __construct($tableName) { // TODO if we extract a class, let's receive it as a parameter here
-        $this->dbName = "test_mysqlfill";
+class MySqlFill {
+    private $tableStructure; // TODO in the future, we want to be able to fill many tables with one call
+    private $configLoader;
+    private $config;
+    private $db;
+
+    public function __construct(ConfigLoader $configLoader = null) { // TODO if we extract a class, let's receive it as a parameter here
+        $this->configLoader = $configLoader ?: new ConcreteConfigLoader();
+        $this->config = $this->configLoader->load();
         $this->db = $this->obtainDb();
-        $this->tableName = $tableName;
         $this->tableStructure = $this->cleanUpTableStructure($this->obtainTableStructure());
     }
 
     public function run() { // TODO let's check if the table is empty first; if it's not don't do it! Or truncate the table first.
-        for($i = 1; $i <= $this->rowsToFill; $i++) { // TODO make this smarter; if an insert fails on a unique constraint, it will not fill all rows. Maybe COUNT(*) after a batch?
+        for($i = 1; $i <= $this->config["rows_to_fill"]; $i++) { // TODO make this smarter; if an insert fails on a unique constraint, it will not fill all rows. Maybe COUNT(*) after a batch?
             $this->insertRow($this->createRandomRow());
         }
     }
@@ -25,7 +26,7 @@ class MySqlFill {
         $fieldNames = implode(", ", array_keys($this->tableStructure));
         $questionMarks = implode(", ", array_fill(0, count($this->tableStructure), "?"));
 
-        $sql = "INSERT INTO {$this->tableName} ({$fieldNames}) VALUES ({$questionMarks});";
+        $sql = "INSERT INTO {$this->config["table_name"]} ({$fieldNames}) VALUES ({$questionMarks});";
 
         $query = $this->db->prepare($sql);
         $query->execute($row);
@@ -61,14 +62,10 @@ class MySqlFill {
     }
 
     public function obtainDb() { // TODO this should be in a different class taken as parameter by the construct, so we can test
-        $host ='localhost'; // TODO all take this from $argv
-        $dbName = $this->dbName;
-        $username = 'root';
-        $password = '';
-        $dsn = "mysql:host=$host;dbname=$dbName";
+        $dsn = "mysql:host={$this->config["hostname"]};dbname={$this->config["database_name"]}";
 
         try {
-            return new PDO($dsn, $username, $password);
+            return new PDO($dsn, $this->config["username"], $this->config["password"]);
         } catch (PDOException $e){
             die("Can't connect to DB. Error: [{$e->getMessage()}]"); // TODO in the future, let's have a better application flow
         }
@@ -78,8 +75,8 @@ class MySqlFill {
         $sql = "
             SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_TYPE, COLUMN_KEY, EXTRA
             FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = '{$this->dbName}'
-            AND TABLE_NAME = '{$this->tableName}';
+            WHERE TABLE_SCHEMA = '{$this->config["database_name"]}'
+            AND TABLE_NAME = '{$this->config["table_name"]}';
             "; // TODO possible SQL injection :( in the future, let's use interpolation for these 2 parameters
 
         $result = $this->db->query($sql);
@@ -116,4 +113,5 @@ class MySqlFill {
         return date("Y-m-d H:i:s", rand(0, time())); // TODO this is good for timestamp, not datetime (datetime range is greater) What about nulls?
     }
 }
-(new MySqlFill($argv[1]))->run(); // TODO take extra parameters, validate it contains something, validate table exists, etc
+
+(new MySqlFill())->run(); // TODO take extra parameters, validate it contains something, validate table exists, etc
