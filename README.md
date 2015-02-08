@@ -21,6 +21,7 @@ You can use the typical mysql connection parameters:
 ## Test
 ```
 cd test
+mysql -uroot -e "CREATE DATABASE test_mysqlfill;"
 phpunit MySqlFillTest.php
 phpunit ConfigTest.php
 ```
