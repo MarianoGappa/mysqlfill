@@ -16,7 +16,7 @@ You can use the typical mysql connection parameters:
 ```
 ./mysqlfill -h localhost -u root -p 1234 %database_name% %table_name%
 ```
-(note, however, that you can't omit spaces between modifier and parameter e.g. -uroot)
+(note, however, that you can't omit spaces between option and parameter e.g. -uroot)
 
 ## Test
 ```
