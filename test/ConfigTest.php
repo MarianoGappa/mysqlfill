@@ -1,11 +1,8 @@
 <?php
 
-include_once '../src/ConfigLoader.php';
+include_once __DIR__ . '/../src/ConfigLoader.php';
 
-// Note: create the `test_mysqlfill` database before running the tests
-// TODO any way we can automate this?
-
-class MySqlFillTest extends PHPUnit_Framework_TestCase
+class ConfigTest extends PHPUnit_Framework_TestCase
 {
     public function testConfigFromArguments() {
         $configFromArguments = new ConcreteConfigFromArguments();
@@ -92,7 +89,12 @@ class MySqlFillTest extends PHPUnit_Framework_TestCase
             "utf8" => false,
             "predictive" => true,
             "config_path" => $configLoaderDir . "/../mysqlfill.conf",
-            "rows_to_fill" => 100
+            "rows_to_fill" => 100,
+            "tests" => [
+                "hostname" => "localhost",
+                "username" => "root",
+                "password" => ""
+            ]
         ];
 
         $actual = $configLoader->load($args, $uniqid);

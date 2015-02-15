@@ -1,7 +1,7 @@
 <?php
 date_default_timezone_set("UTC");
 
-include_once 'ConfigLoader.php';
+include_once __DIR__ . '/ConfigLoader.php';
 
 class MySqlFill {
     private $tableStructure; // TODO in the future, we want to be able to fill many tables with one call
@@ -85,7 +85,13 @@ class MySqlFill {
             die("Couldn't query INFORMATION_SCHEMA :( give me permissions!"); // TODO in the future, let's have a better application flow
         }
 
-        return $result->fetchAll();
+        $result = $result->fetchAll();
+
+        if(!$result) {
+            die("Table structure for table [{$this->config["table_name"]}] on database [{$this->config["database_name"]}] could not be obtained or is empty :("); // TODO in the future, let's have a better application flow
+        }
+
+        return $result;
     }
 
     public function cleanUpTableStructure($tableStructure) {

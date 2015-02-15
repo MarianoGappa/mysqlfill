@@ -92,7 +92,14 @@ class ConcreteDefaultConfig extends DefaultConfig {
             "utf8" => false, // TODO implement
 
             // Should mysqlfill try to guess what the column contains and put data it thinks it'd fit on it?
-            "predictive" => true // TODO implement
+            "predictive" => true, // TODO implement
+
+            // MySQL Db configuration for running tests
+            "tests" => [
+                "hostname" => "localhost",
+                "username" => "root",
+                "password" => ""
+            ]
         ];
     }
 }
@@ -164,15 +171,15 @@ abstract class ConfigValidator {
 class ConcreteConfigValidator extends ConfigValidator {
     public function validate($config) {
         if(!isset($config["database_name"]) || !$config["database_name"]) {
-            die("Fatal: please specify the database name.");
+            die("Fatal: please specify the database name.\n");
         }
 
         if(!isset($config["hostname"]) || !$config["hostname"]) {
-            die("Fatal: please specify the hostname.");
+            die("Fatal: please specify the hostname.\n");
         }
 
         if(!isset($config["table_name"]) || !$config["table_name"]) {
-            die("Fatal: please specify the table name.");
+            die("Fatal: please specify the table name.\n");
         }
     }
 }
