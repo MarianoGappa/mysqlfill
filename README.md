@@ -2,7 +2,7 @@
 Handy CLI tool to quickly fill up a MySQL table for test purposes.
 
 ## Status
-Highly experimental for now. I will update when ready for general usage. I take contributions :)
+Highly experimental for now. I will update when ready for general usage. I take PRs :)
 
 ## Usage
 ```
@@ -20,10 +20,7 @@ You can use the typical mysql connection parameters:
 
 ## Test
 ```
-cd test
-mysql -uroot -e "CREATE DATABASE test_mysqlfill;"
-phpunit MySqlFillTest.php
-phpunit ConfigTest.php
+phpunit test
 ```
 
 ## Dependencies (for testing)
@@ -57,6 +54,13 @@ PHPUnit - https://phpunit.de/
     "utf8" => false,
 
     // Should mysqlfill try to guess what the column contains and put data it thinks it'd fit on it?
-    "predictive" => true
+    "predictive" => true,
+    
+    // MySQL Db configuration for running tests
+    "tests" => [
+        "hostname" => "localhost",
+        "username" => "root",
+        "password" => ""
+    ]    
 ]
 ```
