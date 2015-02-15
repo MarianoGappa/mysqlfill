@@ -10,7 +10,7 @@ Highly experimental for now. I will update when ready for general usage. I take 
 ```
 git clone git@github.com:MarianoGappa/mysqlfill.git
 cd mysqlfill
-ln -s `pwd`/mysqlfill /usr/local/bin/mysqlfill          # Might need to chmod it as well
+ln -s `pwd`/mysqlfill /usr/local/bin/mysqlfill      # Might need to chmod it as well
 ```
 
 ## Usage
