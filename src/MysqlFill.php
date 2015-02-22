@@ -2,23 +2,31 @@
 date_default_timezone_set("UTC");
 
 include_once __DIR__ . '/ConfigLoader.php';
+include_once __DIR__ . '/RowProducer.php';
+include_once __DIR__ . '/ValueProducer.php';
+include_once __DIR__ . '/ColumnStructure.php';
 
 class MySqlFill {
     private $tableStructure; // TODO in the future, we want to be able to fill many tables with one call
     private $configLoader;
     private $config;
     private $db;
+    private $rowProducerFactory;
+    private $rowProducer;
 
-    public function __construct(ConfigLoader $configLoader = null) { // TODO if we extract a class, let's receive it as a parameter here
+    public function __construct(ConfigLoader $configLoader = null, RowProducerFactory $rowProducerFactory = null) {
         $this->configLoader = $configLoader ?: new ConcreteConfigLoader();
+        $this->rowProducerFactory = $rowProducerFactory ?: new ConcreteRowProducerFactory();
+
         $this->config = $this->configLoader->load();
         $this->db = $this->obtainDb();
         $this->tableStructure = $this->cleanUpTableStructure($this->obtainTableStructure());
+        $this->rowProducer = $this->rowProducerFactory->createFor($this->tableStructure);
     }
 
     public function run() { // TODO let's check if the table is empty first; if it's not don't do it! Or truncate the table first.
         for($i = 1; $i <= $this->config["rows_to_fill"]; $i++) { // TODO make this smarter; if an insert fails on a unique constraint, it will not fill all rows. Maybe COUNT(*) after a batch?
-            $this->insertRow($this->createRandomRow());
+            $this->insertRow($this->rowProducer->produce());
         }
     }
 
@@ -29,36 +37,7 @@ class MySqlFill {
         $sql = "INSERT INTO {$this->config["table_name"]} ({$fieldNames}) VALUES ({$questionMarks});";
 
         $query = $this->db->prepare($sql);
-        $query->execute($row);
-    }
-
-    public function createRandomRow() { // TODO extract all randomness to a separate class so it can be mocked for tests
-        $row = [];
-        foreach($this->tableStructure as $column) {
-            switch($column["type"]) {
-                case "datetime":
-                    $row[] = $this->getRandomDatetime();
-                    break;
-                case "varchar":
-                    $row[] = $this->getRandomVarchar(); // TODO need the length here
-                    break;
-                case "bigint":
-                case "int":
-                    $row[] = $this->getRandomInt();
-                    break;
-                case "tinyint":
-                case "smallint":
-                case "mediumint":
-                case "text":
-                case "blob":
-                case "enum":
-                case "set":
-                case "bit":
-                default: // TODO might want to implement all these :)
-                    die("Sorry bro! The data type [{$column["type"]}] is not yet supported! I can't fill your table.");
-            }
-        }
-        return $row;
+        $query->execute(array_values($row));
     }
 
     public function obtainDb() { // TODO this should be in a different class taken as parameter by the construct, so we can test
@@ -98,25 +77,10 @@ class MySqlFill {
         $newStructure = [];
         foreach ($tableStructure as $column) {
             if($column["EXTRA"] != "auto_increment") {
-                $newStructure[$column["COLUMN_NAME"]] = [
-                    "type" => $column["DATA_TYPE"],
-                    "nullable" => $column["IS_NULLABLE"] === "YES" // TODO the reason for having this is picking null sometimes at random
-                ];
+                $newStructure[$column["COLUMN_NAME"]] = new ColumnStructure($column["COLUMN_NAME"], $column["DATA_TYPE"], $column["IS_NULLABLE"] === "YES");
             }
         }
         return $newStructure;
-    }
-
-    public function getRandomInt() {
-        return rand(); // TODO is this the range a MySQL int accepts? What about nulls?
-    }
-
-    public function getRandomVarchar() {
-        return uniqid(); // TODO need varchar length here (it's on COLUMN_TYPE) What about nulls?
-    }
-
-    public function getRandomDatetime() {
-        return date("Y-m-d H:i:s", rand(0, time())); // TODO this is good for timestamp, not datetime (datetime range is greater) What about nulls?
     }
 }
 

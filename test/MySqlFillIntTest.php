@@ -2,7 +2,7 @@
 
 include_once __DIR__ . '/../src/ConfigLoader.php';
 
-class MySqlFillTest extends PHPUnit_Framework_TestCase
+class MySqlFillIntTest extends PHPUnit_Framework_TestCase
 {
     private $config;
     private $db;
