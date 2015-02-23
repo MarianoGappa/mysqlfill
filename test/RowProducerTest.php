@@ -9,23 +9,23 @@ class RowProducerTest extends PHPUnit_Framework_TestCase {
     public function testDefaultValueProducersWorkForCommonTypes() {
         $rowProducerFactory = new ConcreteRowProducerFactory();
 
-        $rowProducer = $rowProducerFactory->createFor([new ColumnStructure("a_string", "varchar", false)]);
+        $rowProducer = $rowProducerFactory->forTableStructure([new ColumnStructure("a_string", "varchar", false)]);
         $this->assertEquals("VarcharValueProducer", get_class($rowProducer->valueProducersForRow["a_string"]));
 
-        $rowProducer = $rowProducerFactory->createFor([new ColumnStructure("an_int", "int", false)]);
+        $rowProducer = $rowProducerFactory->forTableStructure([new ColumnStructure("an_int", "int", false)]);
         $this->assertEquals("IntValueProducer", get_class($rowProducer->valueProducersForRow["an_int"]));
 
-        $rowProducer = $rowProducerFactory->createFor([new ColumnStructure("a_bigint", "bigint", false)]);
+        $rowProducer = $rowProducerFactory->forTableStructure([new ColumnStructure("a_bigint", "bigint", false)]);
         $this->assertEquals("IntValueProducer", get_class($rowProducer->valueProducersForRow["a_bigint"]));
 
-        $rowProducer = $rowProducerFactory->createFor([new ColumnStructure("a_date", "datetime", false)]);
+        $rowProducer = $rowProducerFactory->forTableStructure([new ColumnStructure("a_date", "datetime", false)]);
         $this->assertEquals("DatetimeValueProducer", get_class($rowProducer->valueProducersForRow["a_date"]));
     }
 
     public function testDefaultRowProducerFactoryWorksForSeveralColumns() {
         $rowProducerFactory = new ConcreteRowProducerFactory();
 
-        $rowProducer = $rowProducerFactory->createFor([
+        $rowProducer = $rowProducerFactory->forTableStructure([
             new ColumnStructure("a_string", "varchar", false),
             new ColumnStructure("an_int", "int", false),
             new ColumnStructure("a_date", "datetime", false)

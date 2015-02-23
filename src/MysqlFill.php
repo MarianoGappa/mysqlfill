@@ -5,23 +5,35 @@ include_once __DIR__ . '/ConfigLoader.php';
 include_once __DIR__ . '/RowProducer.php';
 include_once __DIR__ . '/ValueProducer.php';
 include_once __DIR__ . '/ColumnStructure.php';
+include_once __DIR__ . '/TableStructureFetcher.php';
 
 class MySqlFill {
-    private $tableStructure; // TODO in the future, we want to be able to fill many tables with one call
+    private $db;
+
     private $configLoader;
     private $config;
-    private $db;
+
     private $rowProducerFactory;
     private $rowProducer;
 
-    public function __construct(ConfigLoader $configLoader = null, RowProducerFactory $rowProducerFactory = null) {
+    private $tableStructureFetcherFactory;
+    private $tableStructureFetcher;
+    private $tableStructure; // TODO in the future, we want to be able to fill many tables with one call
+
+    public function __construct(
+        ConfigLoader $configLoader = null,
+        RowProducerFactory $rowProducerFactory = null,
+        TableStructureFetcherFactory $tableStructureFetcherFactory = null
+    ) {
         $this->configLoader = $configLoader ?: new ConcreteConfigLoader();
         $this->rowProducerFactory = $rowProducerFactory ?: new ConcreteRowProducerFactory();
+        $this->tableStructureFetcherFactory = $tableStructureFetcherFactory ?: new ConcreteTableStructureFetcherFactory();
 
         $this->config = $this->configLoader->load();
         $this->db = $this->obtainDb();
-        $this->tableStructure = $this->cleanUpTableStructure($this->obtainTableStructure());
-        $this->rowProducer = $this->rowProducerFactory->createFor($this->tableStructure);
+        $this->tableStructureFetcher = $this->tableStructureFetcherFactory->forDatabaseTable($this->config, $this->db); // TODO instead of forDatabaseTable use "forConfig", to allow different types of fetchers (e.g. from sql file)
+        $this->tableStructure = $this->tableStructureFetcher->fetch();
+        $this->rowProducer = $this->rowProducerFactory->forTableStructure($this->tableStructure);
     }
 
     public function run() { // TODO let's check if the table is empty first; if it's not don't do it! Or truncate the table first.
@@ -30,7 +42,7 @@ class MySqlFill {
         }
     }
 
-    public function insertRow($row) {
+    private function insertRow($row) {
         $fieldNames = implode(", ", array_keys($this->tableStructure));
         $questionMarks = implode(", ", array_fill(0, count($this->tableStructure), "?"));
 
@@ -40,7 +52,7 @@ class MySqlFill {
         $query->execute(array_values($row));
     }
 
-    public function obtainDb() { // TODO this should be in a different class taken as parameter by the construct, so we can test
+    private function obtainDb() { // TODO this should be in a different class taken as parameter by the construct, so we can test
         $dsn = "mysql:host={$this->config["hostname"]};dbname={$this->config["database_name"]}";
 
         try {
@@ -50,38 +62,7 @@ class MySqlFill {
         }
     }
 
-    public function obtainTableStructure() {
-        $sql = "
-            SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_TYPE, COLUMN_KEY, EXTRA
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = '{$this->config["database_name"]}'
-            AND TABLE_NAME = '{$this->config["table_name"]}';
-            "; // TODO possible SQL injection :( in the future, let's use interpolation for these 2 parameters
 
-        $result = $this->db->query($sql);
-
-        if($result === false) {
-            die("Couldn't query INFORMATION_SCHEMA :( give me permissions!"); // TODO in the future, let's have a better application flow
-        }
-
-        $result = $result->fetchAll();
-
-        if(!$result) {
-            die("Table structure for table [{$this->config["table_name"]}] on database [{$this->config["database_name"]}] could not be obtained or is empty :("); // TODO in the future, let's have a better application flow
-        }
-
-        return $result;
-    }
-
-    public function cleanUpTableStructure($tableStructure) {
-        $newStructure = [];
-        foreach ($tableStructure as $column) {
-            if($column["EXTRA"] != "auto_increment") {
-                $newStructure[$column["COLUMN_NAME"]] = new ColumnStructure($column["COLUMN_NAME"], $column["DATA_TYPE"], $column["IS_NULLABLE"] === "YES");
-            }
-        }
-        return $newStructure;
-    }
 }
 
 (new MySqlFill())->run(); // TODO take extra parameters, validate it contains something, validate table exists, etc

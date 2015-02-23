@@ -19,7 +19,7 @@ class RowProducer {
 }
 
 abstract class RowProducerFactory {
-    abstract public function createFor($tableStructure);
+    abstract public function forTableStructure($tableStructure);
 }
 
 class ConcreteRowProducerFactory {
@@ -30,7 +30,7 @@ class ConcreteRowProducerFactory {
         $this->valueProducers = $valueProducers ?: $this->defaultValueProducers();
     }
 
-    public function createFor($tableStructure) {
+    public function forTableStructure($tableStructure) {
         return new RowProducer($this->calculateValueProducersForRow($tableStructure));
     }
 
