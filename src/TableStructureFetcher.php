@@ -3,8 +3,9 @@
 interface TableStructureFetcherFactory {}
 
 class ConcreteTableStructureFetcherFactory implements TableStructureFetcherFactory {
-    public function forDatabaseTable($config, PDO $db) {
-        return new ConcreteTableStructureFetcherFromDatabase($config, $db);
+    public function forConfig($config) {
+        // TODO other types
+        return new ConcreteTableStructureFetcherFromDatabase($config);
     }
 }
 
@@ -20,14 +21,14 @@ abstract class TableStructureFetcher {
 }
 
 class ConcreteTableStructureFetcherFromDatabase extends TableStructureFetcher {
-    private $db;
+    public $db;
     private $databaseName;
 
-    public function __construct($config, PDO $db) {
+    public function __construct($config) {
         parent::__construct($config);
 
         $this->databaseName = $config["database_name"];
-        $this->db = $db;
+        $this->db = $this->obtainDb($config["hostname"], $config["database_name"], $config["username"], $config["password"]);
     }
 
     public function fetch() {
@@ -35,6 +36,15 @@ class ConcreteTableStructureFetcherFromDatabase extends TableStructureFetcher {
     }
 
 
+    private function obtainDb($hostname, $databaseName, $username, $password) {
+        $dsn = "mysql:host={$hostname};dbname={$databaseName}";
+
+        try {
+            return new PDO($dsn, $username, $password);
+        } catch (PDOException $e){
+            throw new Exception("Can't connect to DB. Error: [{$e->getMessage()}]"); // TODO in the future, let's have a better application flow
+        }
+    }
 
     private function doFetch() {
         $sql = "
