@@ -50,5 +50,3 @@ class MySqlFill {
         $this->outputHandler->after();
     }
 }
-
-(new MySqlFill())->run(); // TODO take extra parameters, validate it contains something, validate table exists, etc

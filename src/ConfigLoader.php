@@ -2,6 +2,7 @@
 
 abstract class ConfigLoader {
     abstract public function __construct(
+        ConfigFromArray $configFromArray = null,
         ConfigFromArguments $configFromArguments = null,
         ConfigFromFile $configFromFile = null,
         DefaultConfig $defaultConfig = null,
@@ -17,12 +18,14 @@ class ConcreteConfigLoader extends ConfigLoader {
     private $defaultConfig;
 
     public function __construct(
+        ConfigFromArray $configFromArray = null,
         ConfigFromArguments $configFromArguments = null,
         ConfigFromFile $configFromFile = null,
         DefaultConfig $defaultConfig = null,
         ConfigValidator $configValidator = null
         ) {
 
+        $this->configFromArray      = $configFromArray ? $configFromArray->array : [];
         $this->configFromArguments  = $configFromArguments ?: new ConcreteConfigFromArguments();
         $this->configFromFile       = $configFromFile ?: new ConcreteConfigFromFile();
         $this->defaultConfig        = $defaultConfig ?: new ConcreteDefaultConfig();
@@ -39,7 +42,7 @@ class ConcreteConfigLoader extends ConfigLoader {
         $configFromFile         = $this->configFromFile->get($configPath);
         $configFromArguments    = $this->configFromArguments->get($args);
 
-        $config = array_merge($defaultConfig, $configFromFile, $configFromArguments);
+        $config = array_merge($defaultConfig, $configFromFile, $configFromArguments, $this->configFromArray);
 
         $this->configValidator->validate($config);
 
@@ -72,6 +75,9 @@ class ConcreteDefaultConfig extends DefaultConfig {
         return [
             // Where is the main configuration file?
             "config_path" => __DIR__ . "/../mysqlfill.conf", // TODO implement
+
+            // output mode: ["sqldump", "insert", "csvdump", "jsondump"], where 'insert' means insert into table
+            "mode" => "sqldump",
 
             // (i.e. mysql -h ????)
             "hostname" => "localhost", // TODO implement
@@ -181,6 +187,17 @@ class ConcreteConfigValidator extends ConfigValidator {
         if(!isset($config["table_name"]) || !$config["table_name"]) {
             die("Fatal: please specify the table name.\n");
         }
+    }
+}
+
+class ConfigFromArray {
+    public $array;
+
+    public function __construct($array = null) {
+        if(is_array($array) && $array)
+            $this->array = $array;
+        else
+            $this->array = [];
     }
 }
 

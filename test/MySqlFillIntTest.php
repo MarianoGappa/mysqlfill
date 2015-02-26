@@ -1,9 +1,10 @@
 <?php
 
-include_once __DIR__ . '/../src/ConfigLoader.php';
+include_once __DIR__ . '/../src/MysqlFill.php';
 
 class MySqlFillIntTest extends PHPUnit_Framework_TestCase
 {
+    private $configLoader = null;
     private $config;
     private $db;
     private $hostname;
@@ -19,7 +20,7 @@ class MySqlFillIntTest extends PHPUnit_Framework_TestCase
 
 
     public function testItBasicallyWorks() { // TODO might want to do proper testing
-        passthru("./mysqlfill {$this->databaseName} {$this->tableName}");
+        (new MysqlFill($this->configLoader))->run();
         $this->assertEquals(5, $this->countRows()); // TODO this will fail if an INSERT fails on a unique constraint for example
         // TODO also, this tests pretty much nothing other than the algorithm more or less works -_-
     }
@@ -54,13 +55,22 @@ class MySqlFillIntTest extends PHPUnit_Framework_TestCase
 
 
     private function loadConfigs() {
-        if(!$this->config) {
-            $this->config = (new ConcreteConfigLoader(new MockConfigFromArguments()))->load();
+        if(!$this->configLoader) {
+            $this->configLoader = new ConcreteConfigLoader(
+                new ConfigFromArray(
+                    [
+                        "mode"          => "insert",
+                        "database_name" => "mysqlfill_test_" . uniqid(),
+                        "table_name"    => "mysqlfill_test_" . uniqid()
+                    ]
+                )
+            );
+            $this->config = $this->configLoader->load();
             $this->hostname = $this->config["tests"]["hostname"];
             $this->username = $this->config["tests"]["username"];
             $this->password = $this->config["tests"]["password"];
-            $this->databaseName = "mysqlfill_test_" . uniqid();
-            $this->tableName = "mysqlfill_test_" . uniqid();
+            $this->databaseName = $this->config["database_name"];
+            $this->tableName = $this->config["table_name"];
         }
     }
 
@@ -135,8 +145,4 @@ class MySqlFillIntTest extends PHPUnit_Framework_TestCase
             die("Can't connect to DB. Error: [{$e->getMessage()}]"); // TODO in the future, let's have a better application flow
         }
     }
-}
-
-class MockConfigFromArguments extends ConfigFromArguments {
-    public function get($args) { return ["database_name" => "mock_database_name", "table_name" => "mock_table_name"]; }
 }

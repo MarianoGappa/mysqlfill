@@ -77,9 +77,10 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
         $args = ["mysqlfill", "-h", "127.0.0.1", "another_test_database", "test_table"];
 
-        $configLoader = new ConcreteConfigLoader(null, null, null, new MockConfigValidator());
+        $configLoader = new ConcreteConfigLoader(null, null, null, null, new MockConfigValidator());
 
         $expected = [
+            "mode" => "sqldump",
             "table_name" => "test_table",
             "database_name" => "another_test_database",
             "hostname" => "127.0.0.1",
@@ -102,6 +103,14 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         unlink($uniqid);
 
         $this->assertEquals($actual, $expected);
+    }
+
+    public function testConfigArrayOverridesEverything() {
+        $configLoader1 = new ConcreteConfigLoader(new ConfigFromArray(), null, null, null, new MockConfigValidator());
+        $this->assertEquals($configLoader1->load()["mode"], "sqldump");
+
+        $configLoader2 = new ConcreteConfigLoader(new ConfigFromArray(["mode" => "insert"]), null, null, null, new MockConfigValidator());
+        $this->assertEquals($configLoader2->load()["mode"], "insert");
     }
 }
 

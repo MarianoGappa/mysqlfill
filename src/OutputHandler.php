@@ -4,8 +4,13 @@ interface OutputHandlerFactory {}
 
 class ConcreteOutputHandlerFactory implements OutputHandlerFactory {
     public function forConfig($config, $tableStructure, TableStructureFetcher $tableStructureFetcher) {
-        // TODO other types
-        return new ConcreteOutputHandlerFromDatabase($config, $tableStructure, $tableStructureFetcher->db);
+        switch($config["mode"]) {
+            // TODO other types
+            case "insert":
+                return new ConcreteOutputHandlerToDatabase($config, $tableStructure, $tableStructureFetcher->db);
+            case "sqldump":
+                return new ConcreteOutputHandlerToSqlStdoutDump($config, $tableStructure);
+        }
     }
 }
 
@@ -22,7 +27,7 @@ abstract class OutputHandler {
     abstract public function outputRow($row);
 }
 
-class ConcreteOutputHandlerFromDatabase extends OutputHandler {
+class ConcreteOutputHandlerToDatabase extends OutputHandler {
     private $db;
     private $databaseName;
     private $tableStructure;
@@ -43,5 +48,25 @@ class ConcreteOutputHandlerFromDatabase extends OutputHandler {
 
         $query = $this->db->prepare($sql);
         $query->execute(array_values($row));
+    }
+}
+
+class ConcreteOutputHandlerToSqlStdoutDump extends OutputHandler {
+    private $db;
+    private $databaseName;
+    private $tableStructure;
+
+    public function __construct($config, $tableStructure) {
+        parent::__construct($config);
+
+        $this->databaseName = $config["database_name"];
+        $this->tableStructure = $tableStructure;
+    }
+
+    public function outputRow($row) {
+        $fieldNames = implode(", ", array_keys($this->tableStructure));
+        $values = implode(", ", array_keys($this->tableStructure));
+
+        echo "INSERT INTO {$this->tableName} ({$fieldNames}) VALUES ({$values});\n";
     }
 }
