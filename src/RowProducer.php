@@ -1,17 +1,17 @@
 <?php
 
 class RowProducer {
-    public $valueProducersForRow;
+    public $valueGeneratorsForRow;
 
-    public function __construct($valueProducersForRow) {
-        // TODO validate valueProducers
-        $this->valueProducersForRow = $valueProducersForRow;
+    public function __construct($valueGeneratorsForRow) {
+        // TODO validate valueGenerators
+        $this->valueGeneratorsForRow = $valueGeneratorsForRow;
     }
 
     public function produce() {
         $row = [];
-        foreach($this->valueProducersForRow as $fieldName => $valueProducer) {
-            $row[$fieldName] = $valueProducer->produce();
+        foreach($this->valueGeneratorsForRow as $fieldName => $valueGenerator) {
+            $row[$fieldName] = $valueGenerator->next();
         }
 
         return $row;
@@ -23,35 +23,35 @@ abstract class RowProducerFactory {
 }
 
 class ConcreteRowProducerFactory {
-    private $valueProducers;
+    private $valueGenerators;
 
-    public function __construct($valueProducers = null) {
+    public function __construct($valueGenerators = null) {
         // TODO validate non-empty array
-        $this->valueProducers = $valueProducers ?: $this->defaultValueProducers();
+        $this->valueGenerators = $valueGenerators ?: $this->defaultValueGenerators();
     }
 
     public function forTableStructure($tableStructure) {
-        return new RowProducer($this->calculateValueProducersForRow($tableStructure));
+        return new RowProducer($this->calculateValueGeneratorsForRow($tableStructure));
     }
 
-    private function calculateValueProducersForRow($tableStructure) {
-        $producers = [];
+    private function calculateValueGeneratorsForRow($tableStructure) {
+        $generators = [];
         foreach ($tableStructure as $columnStructure) {
-            foreach ($this->valueProducers as $valueProducer) {
-                if($valueProducer::isFitGenerator($columnStructure)) {
-                    $producers[$columnStructure->fieldName] = new $valueProducer($columnStructure);
+            foreach ($this->valueGenerators as $valueGenerator) {
+                if($valueGenerator::isFitGenerator($columnStructure)) {
+                    $generators[$columnStructure->fieldName] = new $valueGenerator($columnStructure);
                     break;
                 }
             }
         }
 
-        if(count($producers) !== count($tableStructure))
-            throw new Exception("Could not find ValueProducers for all table columns.");
+        if(count($generators) !== count($tableStructure))
+            throw new Exception("Could not find ValueGenerators for all table columns.");
 
-        return $producers;
+        return $generators;
     }
 
-    private function defaultValueProducers() {
-        return ["VarcharValueProducer", "DatetimeValueProducer", "IntValueProducer"];
+    private function defaultValueGenerators() {
+        return ["VarcharValueGenerator", "DatetimeValueGenerator", "IntValueGenerator"];
     }
 }

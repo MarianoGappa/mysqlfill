@@ -3,7 +3,7 @@ date_default_timezone_set("UTC");
 
 include_once __DIR__ . '/ConfigLoader.php';
 include_once __DIR__ . '/RowProducer.php';
-include_once __DIR__ . '/ValueProducer.php';
+include_once __DIR__ . '/ValueGenerator.php';
 include_once __DIR__ . '/ColumnStructure.php';
 include_once __DIR__ . '/TableStructureFetcher.php';
 include_once __DIR__ . '/OutputHandler.php';

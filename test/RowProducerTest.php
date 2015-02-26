@@ -2,7 +2,7 @@
 date_default_timezone_set("UTC");
 
 include_once __DIR__ . '/../src/RowProducer.php';
-include_once __DIR__ . '/../src/ValueProducer.php';
+include_once __DIR__ . '/../src/ValueGenerator.php';
 include_once __DIR__ . '/../src/ColumnStructure.php';
 
 class RowProducerTest extends PHPUnit_Framework_TestCase {
@@ -10,16 +10,16 @@ class RowProducerTest extends PHPUnit_Framework_TestCase {
         $rowProducerFactory = new ConcreteRowProducerFactory();
 
         $rowProducer = $rowProducerFactory->forTableStructure([new ColumnStructure("a_string", "varchar", false)]);
-        $this->assertEquals("VarcharValueProducer", get_class($rowProducer->valueProducersForRow["a_string"]));
+        $this->assertEquals("VarcharValueGenerator", get_class($rowProducer->valueGeneratorsForRow["a_string"]));
 
         $rowProducer = $rowProducerFactory->forTableStructure([new ColumnStructure("an_int", "int", false)]);
-        $this->assertEquals("IntValueProducer", get_class($rowProducer->valueProducersForRow["an_int"]));
+        $this->assertEquals("IntValueGenerator", get_class($rowProducer->valueGeneratorsForRow["an_int"]));
 
         $rowProducer = $rowProducerFactory->forTableStructure([new ColumnStructure("a_bigint", "bigint", false)]);
-        $this->assertEquals("IntValueProducer", get_class($rowProducer->valueProducersForRow["a_bigint"]));
+        $this->assertEquals("IntValueGenerator", get_class($rowProducer->valueGeneratorsForRow["a_bigint"]));
 
         $rowProducer = $rowProducerFactory->forTableStructure([new ColumnStructure("a_date", "datetime", false)]);
-        $this->assertEquals("DatetimeValueProducer", get_class($rowProducer->valueProducersForRow["a_date"]));
+        $this->assertEquals("DatetimeValueGenerator", get_class($rowProducer->valueGeneratorsForRow["a_date"]));
     }
 
     public function testDefaultRowProducerFactoryWorksForSeveralColumns() {
@@ -31,7 +31,7 @@ class RowProducerTest extends PHPUnit_Framework_TestCase {
             new ColumnStructure("a_date", "datetime", false)
         ]);
 
-        $this->assertCount(3, $rowProducer->valueProducersForRow);
+        $this->assertCount(3, $rowProducer->valueGeneratorsForRow);
 
         $row = $rowProducer->produce();
 

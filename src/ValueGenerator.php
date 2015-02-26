@@ -1,13 +1,13 @@
 <?php
 
-abstract class ValueProducer {
+abstract class ValueGenerator {
     abstract public function __construct($columnStructure);
-    abstract public function produce();
+    abstract public function next();
     abstract public static function isFitGenerator($columnStructure);
 }
 
-class VarcharValueProducer extends ValueProducer {
-    public function produce() {
+class VarcharValueGenerator extends ValueGenerator {
+    public function next() {
         return uniqid();
     }
 
@@ -18,8 +18,8 @@ class VarcharValueProducer extends ValueProducer {
     }
 }
 
-class DatetimeValueProducer extends ValueProducer {
-    public function produce() {
+class DatetimeValueGenerator extends ValueGenerator {
+    public function next() {
         return date("Y-m-d H:i:s", rand(0, time()));
     }
 
@@ -30,8 +30,8 @@ class DatetimeValueProducer extends ValueProducer {
     }
 }
 
-class IntValueProducer extends ValueProducer {
-    public function produce() {
+class IntValueGenerator extends ValueGenerator {
+    public function next() {
         return rand();
     }
 
