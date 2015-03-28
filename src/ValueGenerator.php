@@ -10,11 +10,15 @@ abstract class ValueGenerator {
 	}
     abstract public function next();
     abstract public static function isFitGenerator($columnStructure);
+
+    public function quote($string) {
+        return "'{$string}'";
+    }
 }
 
 class VarcharValueGenerator extends ValueGenerator {
     public function next() {
-        return uniqid();
+        return $this->quote(uniqid());
     }
 
     public static function isFitGenerator($columnStructure) {
@@ -24,7 +28,7 @@ class VarcharValueGenerator extends ValueGenerator {
 
 class DatetimeValueGenerator extends ValueGenerator {
     public function next() {
-        return date('Y-m-d H:i:s', rand(0, time()));
+        return $this->quote(date('Y-m-d H:i:s', rand(0, time())));
     }
 
     public static function isFitGenerator($columnStructure) {
@@ -53,7 +57,7 @@ class IntValueGenerator extends ValueGenerator {
 
 class EnumValueGenerator extends ValueGenerator {
 	public function next() {
-	 	return $this->columnStructure->values[array_rand($this->columnStructure->values)];
+	 	return $this->quote($this->columnStructure->values[array_rand($this->columnStructure->values)]);
 	}
 
 	public static function isFitGenerator($columnStructure) {

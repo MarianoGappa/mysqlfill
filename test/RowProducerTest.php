@@ -43,6 +43,6 @@ class RowProducerTest extends PHPUnit_Framework_TestCase {
         $this->assertInternalType("string", $row["a_string"]);
         $this->assertInternalType("int", $row["an_int"]);
         $this->assertInternalType("string", $row["a_date"]);
-        $this->assertStringMatchesFormat("%d-%d-%d %d:%d:%d", $row["a_date"]);
+        $this->assertStringMatchesFormat("'%d-%d-%d %d:%d:%d'", $row["a_date"]);
     }
 }
