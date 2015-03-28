@@ -73,7 +73,7 @@ class ConcreteTableStructureFetcherFromDatabase extends TableStructureFetcher {
         $newStructure = [];
         foreach ($tableStructure as $column) {
             if($column["EXTRA"] != "auto_increment") {
-                $newStructure[$column["COLUMN_NAME"]] = new ColumnStructure($column["COLUMN_NAME"], $column["DATA_TYPE"], $column["IS_NULLABLE"] === "YES");
+                $newStructure[$column["COLUMN_NAME"]] = new ColumnStructure($column["COLUMN_NAME"], $column["DATA_TYPE"], $column["IS_NULLABLE"] === "YES", $column["COLUMN_TYPE"]);
             }
         }
         return $newStructure;

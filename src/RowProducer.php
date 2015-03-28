@@ -46,12 +46,12 @@ class ConcreteRowProducerFactory {
         }
 
         if(count($generators) !== count($tableStructure))
-            throw new Exception("Could not find ValueGenerators for all table columns.");
+            throw new Exception('Could not find ValueGenerators for all table columns.');
 
         return $generators;
     }
 
     private function defaultValueGenerators() {
-        return ["VarcharValueGenerator", "DatetimeValueGenerator", "IntValueGenerator"];
+        return ['VarcharValueGenerator', 'DatetimeValueGenerator', 'IntValueGenerator', 'EnumValueGenerator'];
     }
 }

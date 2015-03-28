@@ -47,7 +47,7 @@ class ConcreteOutputHandlerToDatabase extends OutputHandler {
         $sql = "INSERT INTO {$this->tableName} ({$fieldNames}) VALUES ({$questionMarks});";
 
         $query = $this->db->prepare($sql);
-        $query->execute(array_values($row));
+		$query->execute(array_values($row));
     }
 }
 
@@ -64,8 +64,8 @@ class ConcreteOutputHandlerToSqlStdoutDump extends OutputHandler {
     }
 
     public function outputRow($row) {
-        $fieldNames = implode(", ", array_keys($this->tableStructure));
-        $values = implode(", ", array_keys($this->tableStructure));
+        $fieldNames = implode(", ", array_keys($row));
+        $values = implode(", ", array_values($row));
 
         echo "INSERT INTO {$this->tableName} ({$fieldNames}) VALUES ({$values});\n";
     }
