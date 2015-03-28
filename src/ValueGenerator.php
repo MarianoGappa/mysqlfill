@@ -1,10 +1,12 @@
 <?php
 
 abstract class ValueGenerator {
+	public $config;
 	public $columnStructure;
 
-	public function __construct($columnStructure) {
-		$this->columnStructure = $columnStructure;
+	public function __construct($config, $columnStructure) {
+		$this->config = $config;	
+		$this->columnStructure = $this->columnStructure = $columnStructure;
 	}
     abstract public function next();
     abstract public static function isFitGenerator($columnStructure);

@@ -9,26 +9,26 @@ class RowProducerTest extends PHPUnit_Framework_TestCase {
     public function testDefaultValueProducersWorkForCommonTypes() {
         $rowProducerFactory = new ConcreteRowProducerFactory();
 
-        $rowProducer = $rowProducerFactory->forTableStructure([new ColumnStructure("a_string", "varchar", false, "")]);
+        $rowProducer = $rowProducerFactory->forTableStructure([], [new ColumnStructure("a_string", "varchar", false, "")]);
         $this->assertEquals("VarcharValueGenerator", get_class($rowProducer->valueGeneratorsForRow["a_string"]));
 
-        $rowProducer = $rowProducerFactory->forTableStructure([new ColumnStructure("an_int", "int", false, "")]);
+        $rowProducer = $rowProducerFactory->forTableStructure([], [new ColumnStructure("an_int", "int", false, "")]);
         $this->assertEquals("IntValueGenerator", get_class($rowProducer->valueGeneratorsForRow["an_int"]));
 
-        $rowProducer = $rowProducerFactory->forTableStructure([new ColumnStructure("a_bigint", "bigint", false, "")]);
+        $rowProducer = $rowProducerFactory->forTableStructure([], [new ColumnStructure("a_bigint", "bigint", false, "")]);
         $this->assertEquals("IntValueGenerator", get_class($rowProducer->valueGeneratorsForRow["a_bigint"]));
 
-        $rowProducer = $rowProducerFactory->forTableStructure([new ColumnStructure("a_date", "datetime", false, "")]);
+        $rowProducer = $rowProducerFactory->forTableStructure([], [new ColumnStructure("a_date", "datetime", false, "")]);
         $this->assertEquals("DatetimeValueGenerator", get_class($rowProducer->valueGeneratorsForRow["a_date"]));
 
-        $rowProducer = $rowProducerFactory->forTableStructure([new ColumnStructure("an_enum", "enum", false, "")]);
+        $rowProducer = $rowProducerFactory->forTableStructure([], [new ColumnStructure("an_enum", "enum", false, "")]);
         $this->assertEquals("EnumValueGenerator", get_class($rowProducer->valueGeneratorsForRow["an_enum"]));
     }
 
     public function testDefaultRowProducerFactoryWorksForSeveralColumns() {
         $rowProducerFactory = new ConcreteRowProducerFactory();
 
-        $rowProducer = $rowProducerFactory->forTableStructure([
+        $rowProducer = $rowProducerFactory->forTableStructure([], [
             new ColumnStructure("a_string", "varchar", false, ""),
             new ColumnStructure("an_int", "int", false, ""),
             new ColumnStructure("a_date", "datetime", false, "")

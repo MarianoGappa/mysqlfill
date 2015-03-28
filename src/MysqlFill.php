@@ -38,7 +38,7 @@ class MySqlFill {
         $this->config = $this->configLoader->load();
         $this->tableStructureFetcher = $this->tableStructureFetcherFactory->forConfig($this->config);
         $this->tableStructure = $this->tableStructureFetcher->fetch();
-        $this->rowProducer = $this->rowProducerFactory->forTableStructure($this->tableStructure);
+        $this->rowProducer = $this->rowProducerFactory->forTableStructure($this->config, $this->tableStructure);
         $this->outputHandler = $this->outputHandlerFactory->forConfig($this->config, $this->tableStructure, $this->tableStructureFetcher);
     }
 

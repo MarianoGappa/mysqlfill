@@ -1,10 +1,12 @@
 <?php
 
 class RowProducer {
-    public $valueGeneratorsForRow;
+	public $config;
+	public $valueGeneratorsForRow;
 
-    public function __construct($valueGeneratorsForRow) {
-        // TODO validate valueGenerators
+    public function __construct($config, $valueGeneratorsForRow) {
+		$this->config = $config;
+		// TODO validate valueGenerators
         $this->valueGeneratorsForRow = $valueGeneratorsForRow;
     }
 
@@ -30,16 +32,16 @@ class ConcreteRowProducerFactory {
         $this->valueGenerators = $valueGenerators ?: $this->defaultValueGenerators();
     }
 
-    public function forTableStructure($tableStructure) {
-        return new RowProducer($this->calculateValueGeneratorsForRow($tableStructure));
+    public function forTableStructure($config, $tableStructure) {
+        return new RowProducer($config, $this->calculateValueGeneratorsForRow($config, $tableStructure));
     }
 
-    private function calculateValueGeneratorsForRow($tableStructure) {
+    private function calculateValueGeneratorsForRow($config, $tableStructure) {
         $generators = [];
         foreach ($tableStructure as $columnStructure) {
             foreach ($this->valueGenerators as $valueGenerator) {
                 if($valueGenerator::isFitGenerator($columnStructure)) {
-                    $generators[$columnStructure->fieldName] = new $valueGenerator($columnStructure);
+                    $generators[$columnStructure->fieldName] = new $valueGenerator($config, $columnStructure);
                     break;
                 }
             }
