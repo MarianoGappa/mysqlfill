@@ -54,6 +54,15 @@ class ConcreteRowProducerFactory {
     }
 
     private function defaultValueGenerators() {
-        return ['VarcharValueGenerator', 'DatetimeValueGenerator', 'IntValueGenerator', 'EnumValueGenerator'];
+        return [
+            'VarcharValueGenerator', 
+            'DatetimeValueGenerator', 
+            'IntValueGenerator', 
+            'EnumValueGenerator', 
+            'DecimalValueGenerator', 
+            'FloatValueGenerator',
+            'TimestampValueGenerator',
+            'DateValueGenerator'
+        ];
     }
 }
